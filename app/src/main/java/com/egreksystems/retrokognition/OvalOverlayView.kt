@@ -16,8 +16,6 @@ class OvalOverlayView(context: Context, attributeSet: AttributeSet) : View(conte
     private var borderWidth: Float = 4.0f
 
     private val dimColor = ContextCompat.getColor(context, R.color.semi_transparent)
-    private val resizeRatio: Float = 1.25f
-    private val clipClearance: Float = 8f
 
     private var path: Path = Path()
     private var rectF: RectF = RectF()
@@ -39,6 +37,7 @@ class OvalOverlayView(context: Context, attributeSet: AttributeSet) : View(conte
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         drawClippedOval(canvas, rectF)
+
     }
 
     private fun drawClippedOval(canvas: Canvas, rectF: RectF){
@@ -47,7 +46,7 @@ class OvalOverlayView(context: Context, attributeSet: AttributeSet) : View(conte
         val height = height.toFloat()
         val width = width.toFloat()
 
-        rectF.set(clipClearance, clipClearance, width - clipClearance, height - clipClearance)
+        rectF.set(width * 0.18f, height * 0.18f, width * 0.82f, height * 0.68f)
 
         path.addOval(rectF, Path.Direction.CW)
 
@@ -64,15 +63,9 @@ class OvalOverlayView(context: Context, attributeSet: AttributeSet) : View(conte
 
     }
 
-    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec)
-        val size = min(measuredWidth, measuredHeight)
-        val h = size * resizeRatio
-        setMeasuredDimension(size, h.toInt())
-    }
 
-    fun setPaintStyle(color: Long, isDashed: Boolean){
-        this.paint.color = color.toInt()
+    fun setPaintStyle(color: Int, isDashed: Boolean){
+        this.paint.color = color
         this.paint.style = Paint.Style.STROKE
         this.paint.strokeWidth = borderWidth
 

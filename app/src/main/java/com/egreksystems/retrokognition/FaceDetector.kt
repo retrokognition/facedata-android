@@ -18,11 +18,10 @@ class FaceDetector() {
     private lateinit var onFaceDetected: IOnFaceDetected
 
     private val options = FirebaseVisionFaceDetectorOptions.Builder()
-        .setClassificationMode(FirebaseVisionFaceDetectorOptions.ACCURATE)
         .setLandmarkMode(FirebaseVisionFaceDetectorOptions.ALL_LANDMARKS)
         .setClassificationMode(FirebaseVisionFaceDetectorOptions.ALL_CLASSIFICATIONS)
+        .setContourMode(FirebaseVisionFaceDetectorOptions.ALL_CONTOURS)
         .setMinFaceSize(0.15f)
-        .enableTracking()
         .build()
 
     /**

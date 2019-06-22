@@ -2,10 +2,13 @@ package com.egreksystems.retrokognition
 
 import android.content.Context
 import android.content.res.Resources
+import android.graphics.Color
 import android.hardware.camera2.CameraManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
+import androidx.core.content.ContextCompat
 
 import androidx.databinding.DataBindingUtil
 import com.egreksystems.retrokognition.databinding.ActivityMainBinding
@@ -33,9 +36,10 @@ class MainActivity : IOnFaceDetected, AppCompatActivity() {
         camera = binding.camera
         camera.setLifecycleOwner(this)
         faceDetector = FaceDetector()
+        val cameraManager = getSystemService(Context.CAMERA_SERVICE) as CameraManager
 
         camera.addFrameProcessor { frame ->
-            val cameraManager = getSystemService(Context.CAMERA_SERVICE) as CameraManager
+
             faceDetector.detectFaces(
                 frame,
                 cameraManager,
@@ -53,28 +57,19 @@ class MainActivity : IOnFaceDetected, AppCompatActivity() {
 
         val boundingBox = face.boundingBox
 
-        Log.e("FACE_BOX_LEFT", boundingBox.left.toString())
-        Log.e("FACE_BOX_TOP", boundingBox.top.toString())
-        Log.e("FACE_BOX_RIGHT", boundingBox.right.toString())
-        Log.e("FACE_BOX_BOTTOM", boundingBox.bottom.toString())
-
-        Log.e("OVAL_BOX_LEFT", binding.ovalOverlayView.getOvalLeft().toString())
-        Log.e("OVAL_BOX_TOP", binding.ovalOverlayView.getOvalTop().toString())
-        Log.e("OVAL_BOX_RIGHT", binding.ovalOverlayView.getOvalRight().toString())
-        Log.e("OVAL_BOX_BOTTOM", binding.ovalOverlayView.getOvalBottom().toString())
         if(boundingBox.left > binding.ovalOverlayView.getOvalLeft()&&
                 boundingBox.top > binding.ovalOverlayView.getOvalTop()&&
                 boundingBox.right < binding.ovalOverlayView.getOvalRight()&&
                 boundingBox.bottom < binding.ovalOverlayView.getOvalBottom()){
-            binding.ovalOverlayView.setPaintStyle(0xFF00FF00, false)
+            binding.ovalOverlayView.setPaintStyle(ContextCompat.getColor(this, R.color.color_turquoise), false)
+        } else {
+            binding.ovalOverlayView.setPaintStyle(Color.WHITE, true)
         }
-        if (face.smilingProbability != FirebaseVisionFace.UNCOMPUTED_PROBABILITY){
-            Log.e("SIMLE PROB", face.smilingProbability.toString())
-        }
+
     }
 
     override fun onFaceDetectFailure(errorMessage: String) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        Toast.makeText(this, getString(R.string.face_detection_error_message), Toast.LENGTH_LONG).show()
     }
 
 
