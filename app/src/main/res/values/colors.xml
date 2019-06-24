@@ -10,4 +10,10 @@
     <color name="semi_transparent">#80000000</color>
     <color name="color_emerald">#2ecc71</color>
     <color name="color_turquoise">#1abc9c</color>
+    <color name="color_alizarin">#e74c3c</color>
+
+    <color name="color_btn_gray">#DFDFDF</color>
+    <color name="color_btn_disable">#9B4239</color>
+
+
 </resources>

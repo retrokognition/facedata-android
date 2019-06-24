@@ -1,8 +1,10 @@
 package com.egreksystems.retrokognition
 
-interface IOnFaceDetected {
+interface IFaceDetectionListener {
 
     fun onFaceDetectSuccess(faceData: FaceData)
+
+    fun onNoFaceDetected()
 
     fun onFaceDetectFailure(errorMessage: String)
 

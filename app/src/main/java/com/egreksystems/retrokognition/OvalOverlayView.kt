@@ -13,7 +13,7 @@ class OvalOverlayView(context: Context, attributeSet: AttributeSet) : View(conte
     private val paint: Paint = Paint(Paint.ANTI_ALIAS_FLAG)
 
     private var borderColor: Int = Color.WHITE
-    private var borderWidth: Float = 4.0f
+    private var borderWidth: Float = 6.0f
 
     private val dimColor = ContextCompat.getColor(context, R.color.semi_transparent)
 

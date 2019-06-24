@@ -1,5 +1,5 @@
 <resources>
     <string name="app_name">RetroKognition</string>
-    <string name="position_face">Position your face the in oval</string>
+    <string name="position_face">Position your head the in oval</string>
     <string name="face_detection_error_message">Error detecting face!</string>
 </resources>

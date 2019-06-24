@@ -3,8 +3,8 @@ package com.egreksystems.retrokognition
 import android.app.Activity
 import android.content.Context
 import android.hardware.camera2.CameraManager
-import com.google.android.gms.tasks.OnFailureListener
-import com.google.firebase.FirebaseApp
+import android.util.Log
+import com.google.android.gms.tasks.Tasks
 import com.google.firebase.ml.vision.FirebaseVision
 import com.google.firebase.ml.vision.common.FirebaseVisionImage
 import com.google.firebase.ml.vision.common.FirebaseVisionImageMetadata
@@ -13,14 +13,13 @@ import com.otaliastudios.cameraview.Facing
 import com.otaliastudios.cameraview.Frame
 import java.lang.Exception
 
-class FaceDetector() {
+class FaceDetector {
 
-    private lateinit var onFaceDetected: IOnFaceDetected
+    private lateinit var faceDetectionListener: IFaceDetectionListener
 
     private val options = FirebaseVisionFaceDetectorOptions.Builder()
         .setLandmarkMode(FirebaseVisionFaceDetectorOptions.ALL_LANDMARKS)
         .setClassificationMode(FirebaseVisionFaceDetectorOptions.ALL_CLASSIFICATIONS)
-        .setContourMode(FirebaseVisionFaceDetectorOptions.ALL_CONTOURS)
         .setMinFaceSize(0.15f)
         .build()
 
@@ -49,17 +48,16 @@ class FaceDetector() {
     fun detectFaces(
         frame: Frame,
         cameraManager: CameraManager,
-        width: Int,
-        height: Int,
         context: Context,
         activity: Activity
     ) {
+
         val imageData = frame.data
         val frameSize = frame.size
         val cameraId = cameraManager.cameraIdList[Facing.FRONT.ordinal]
         val imageRotation = CameraUtils.getRotationCompensation(cameraId, activity, context)
         val metadata =
-            generateFirebaseImageMetaData(imageRotation, frameSize?.width ?: width, frameSize?.height ?: height)
+            generateFirebaseImageMetaData(imageRotation, frameSize.width, frameSize.height)
 
         val firebaseVisionImage = imageData?.let { FirebaseVisionImage.fromByteArray(imageData, metadata) }
 
@@ -67,18 +65,23 @@ class FaceDetector() {
             .getVisionFaceDetector(options)
 
         detector.detectInImage(firebaseVisionImage)
-            .addOnSuccessListener { faces ->
-                if (faces.isNotEmpty()){
-                    onFaceDetected.onFaceDetectSuccess(FaceData(faces[0]))
+            .addOnSuccessListener(activity) { faces ->
+                if (faces.isNotEmpty()) {
+                    faceDetectionListener.onFaceDetectSuccess(FaceData(faces[0]))
+                } else {
+                    faceDetectionListener.onNoFaceDetected()
                 }
             }
-            .addOnFailureListener { exception ->
-                onFaceDetected.onFaceDetectFailure(exception.localizedMessage)
+            .addOnFailureListener(activity) { exception ->
+                faceDetectionListener.onFaceDetectFailure(exception.localizedMessage)
             }
 
+        detector.close()
+
     }
 
-    fun setOnFaceDetected(listener: IOnFaceDetected) {
-        onFaceDetected = listener
+    fun setFaceDetectionListener(listener: IFaceDetectionListener) {
+        faceDetectionListener = listener
     }
+
 }
