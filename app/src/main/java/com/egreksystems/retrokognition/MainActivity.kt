@@ -1,7 +1,9 @@
 package com.egreksystems.retrokognition
 
 import android.content.Context
+import android.gesture.OrientedBoundingBox
 import android.graphics.Color
+import android.graphics.Rect
 import android.hardware.camera2.CameraManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -15,8 +17,13 @@ import com.google.firebase.FirebaseApp
 import com.google.firebase.ml.vision.face.FirebaseVisionFace
 import com.otaliastudios.cameraview.CameraView
 import com.otaliastudios.cameraview.FrameProcessor
+import com.otaliastudios.cameraview.AspectRatio
+import com.otaliastudios.cameraview.SizeSelectors
+import com.otaliastudios.cameraview.SizeSelector
 
-class MainActivity : IFaceDetectionListener, AppCompatActivity() {
+
+
+class MainActivity : IFaceDetectionListener, ILivenessEventListener, AppCompatActivity() {
 
     lateinit var camera: CameraView
     private lateinit var binding: ActivityMainBinding
@@ -25,6 +32,11 @@ class MainActivity : IFaceDetectionListener, AppCompatActivity() {
     private var isFaceInOval: Boolean = false
     private lateinit var frameProcessor: FrameProcessor
     private var skipUnprocessedFrame = false
+    private lateinit var events: LivenessDetectionEvents
+    private lateinit var livenessProcessor: LivenessProcessor
+    private var performLiveness = false
+    private var isLivenessDone = false
+    private var currentEvent: Int? = -1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,6 +49,7 @@ class MainActivity : IFaceDetectionListener, AppCompatActivity() {
     private fun init() {
 
         camera = binding.camera
+
         camera.setLifecycleOwner(this)
         skipUnprocessedFrame = false
         faceDetector = FaceDetector()
@@ -44,28 +57,79 @@ class MainActivity : IFaceDetectionListener, AppCompatActivity() {
         recordButton = binding.recordButton
         val cameraManager = getSystemService(Context.CAMERA_SERVICE) as CameraManager
 
+        events = LivenessDetectionEvents.Builder().setEvent(LivenessDetectionEvents.BLINK)
+            .setEvent(LivenessDetectionEvents.SMILE)
+            .build()
+
+        livenessProcessor = LivenessProcessor(events)
+
+        livenessProcessor.setLivenessEventListener(this)
+
         frameProcessor = FrameProcessor { frame ->
-           if (!skipUnprocessedFrame){
-               Log.i("NEW_FRAME", "--New Frame Passed--")
-               faceDetector.detectFaces(
-                   frame,
-                   cameraManager,
-                   this,
-                   this
-               )
-               skipUnprocessedFrame = true
-           }
+            if (!skipUnprocessedFrame) {
+                Log.i("NEW_FRAME", "--New Frame Passed--")
+                faceDetector.detectFaces(
+                    frame,
+                    cameraManager,
+                    this,
+                    this
+                )
+                skipUnprocessedFrame = true
+            }
         }
 
         camera.addFrameProcessor(frameProcessor)
 
         recordButton.setOnClickListener {
-            if (!recordButton.getPressedState()){
+            if (!recordButton.getPressedState()) {
+                performLiveness = true
+                currentEvent = events.eventQueue.dequeue()
                 recordButton.enablePressed(true)
                 GeneralUtils.performHapticFeedback(this, GeneralUtils.BUTTON_CLICK_HAPTIC)
+                recordButton.isEnabled = false
+            } else {
+                performLiveness = false
             }
         }
 
+    }
+
+    private fun handleFaceDetected(faceData: FaceData, boundingBox: Rect) {
+
+        if (boundingBox.left > binding.ovalOverlayView.getOvalLeft() &&
+            boundingBox.top > binding.ovalOverlayView.getOvalTop() &&
+            boundingBox.right < binding.ovalOverlayView.getOvalRight() &&
+            boundingBox.bottom < binding.ovalOverlayView.getOvalBottom()
+        ) {
+            if (!isFaceInOval) {
+                binding.ovalOverlayView.setPaintStyle(ContextCompat.getColor(this, R.color.color_turquoise), false)
+                recordButton.enableButton(true)
+                isFaceInOval = true
+            }
+
+            if (performLiveness && !isLivenessDone) {
+                livenessProcessor.detectEvent(faceData, currentEvent)
+            }
+
+        } else {
+            if (isFaceInOval) {
+                handleSpoof()
+            }
+
+        }
+    }
+
+    private fun handleSpoof() {
+        binding.ovalOverlayView.setPaintStyle(Color.WHITE, true)
+        recordButton.enableButton(false)
+        recordButton.enablePressed(false)
+        isFaceInOval = false
+
+        isLivenessDone = false
+        if (performLiveness) {
+            livenessProcessor.resetEvents()
+            performLiveness = false
+        }
     }
 
     override fun onFaceDetectSuccess(faceData: FaceData) {
@@ -74,41 +138,18 @@ class MainActivity : IFaceDetectionListener, AppCompatActivity() {
 
         val boundingBox = face.boundingBox
 
-        if(boundingBox.left > binding.ovalOverlayView.getOvalLeft()&&
-                boundingBox.top > binding.ovalOverlayView.getOvalTop()&&
-                boundingBox.right < binding.ovalOverlayView.getOvalRight()&&
-                boundingBox.bottom < binding.ovalOverlayView.getOvalBottom())
-        {
-            if (!isFaceInOval){
-                binding.ovalOverlayView.setPaintStyle(ContextCompat.getColor(this, R.color.color_turquoise), false)
-                recordButton.enableButton(true)
-                isFaceInOval = true
-            }
-
-        } else {
-            if (isFaceInOval){
-                binding.ovalOverlayView.setPaintStyle(Color.WHITE, true)
-                recordButton.enableButton(false)
-                recordButton.enablePressed(false)
-                isFaceInOval = false
-            }
-
-        }
+        handleFaceDetected(faceData, boundingBox)
 
     }
 
     override fun onNoFaceDetected() {
         skipUnprocessedFrame = false
-        binding.ovalOverlayView.setPaintStyle(Color.WHITE, true)
-        recordButton.enableButton(false)
-        recordButton.enablePressed(false)
+        handleSpoof()
     }
 
     override fun onFaceDetectFailure(errorMessage: String) {
         skipUnprocessedFrame = false
-        binding.ovalOverlayView.setPaintStyle(Color.WHITE, true)
-        recordButton.enableButton(false)
-        recordButton.enablePressed(false)
+        handleSpoof()
         Toast.makeText(this, getString(R.string.face_detection_error_message), Toast.LENGTH_LONG).show()
     }
 
@@ -123,5 +164,16 @@ class MainActivity : IFaceDetectionListener, AppCompatActivity() {
         init()
     }
 
+    override fun onEventDetectionSuccess(event: Int) {
+        if (event == currentEvent && events.eventQueue.isEmpty()) {
+            isLivenessDone = true
+        } else {
+            currentEvent = events.eventQueue.dequeue()
+        }
+    }
+
+    override fun onEventDetectionCancelled() {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
 
 }

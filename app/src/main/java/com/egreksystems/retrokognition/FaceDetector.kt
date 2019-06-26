@@ -20,6 +20,7 @@ class FaceDetector {
     private val options = FirebaseVisionFaceDetectorOptions.Builder()
         .setLandmarkMode(FirebaseVisionFaceDetectorOptions.ALL_LANDMARKS)
         .setClassificationMode(FirebaseVisionFaceDetectorOptions.ALL_CLASSIFICATIONS)
+        .setClassificationMode(FirebaseVisionFaceDetectorOptions.ACCURATE)
         .setMinFaceSize(0.15f)
         .build()
 
