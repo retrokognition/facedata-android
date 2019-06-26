@@ -7,4 +7,5 @@
     <string name="blink_your_eyes">Blink your eyes</string>
     <string name="smile_brightly">Smile brightly</string>
     <string name="an_icon_indicator_to_tell_the_user_what_action_to_perform">An Icon indicator to tell the user what action to perform</string>
+    <string name="press_record_button">Press the button to start recording events</string>
 </resources>

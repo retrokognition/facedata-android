@@ -1,13 +1,13 @@
 package com.egreksystems.retrokognition
 
 import android.content.Context
-import android.gesture.OrientedBoundingBox
 import android.graphics.Color
 import android.graphics.Rect
 import android.hardware.camera2.CameraManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 
@@ -17,10 +17,6 @@ import com.google.firebase.FirebaseApp
 import com.google.firebase.ml.vision.face.FirebaseVisionFace
 import com.otaliastudios.cameraview.CameraView
 import com.otaliastudios.cameraview.FrameProcessor
-import com.otaliastudios.cameraview.AspectRatio
-import com.otaliastudios.cameraview.SizeSelectors
-import com.otaliastudios.cameraview.SizeSelector
-
 
 
 class MainActivity : IFaceDetectionListener, ILivenessEventListener, AppCompatActivity() {
@@ -92,6 +88,7 @@ class MainActivity : IFaceDetectionListener, ILivenessEventListener, AppCompatAc
             }
         }
 
+
     }
 
     private fun handleFaceDetected(faceData: FaceData, boundingBox: Rect) {
@@ -105,10 +102,11 @@ class MainActivity : IFaceDetectionListener, ILivenessEventListener, AppCompatAc
                 binding.ovalOverlayView.setPaintStyle(ContextCompat.getColor(this, R.color.color_turquoise), false)
                 recordButton.enableButton(true)
                 isFaceInOval = true
+                binding.instructionText.setText(R.string.press_record_button)
             }
 
             if (performLiveness && !isLivenessDone) {
-                livenessProcessor.detectEvent(faceData, currentEvent)
+                performLivenessEvent(faceData)
             }
 
         } else {
@@ -130,6 +128,28 @@ class MainActivity : IFaceDetectionListener, ILivenessEventListener, AppCompatAc
             livenessProcessor.resetEvents()
             performLiveness = false
         }
+
+        binding.livenessInstructionBackground.visibility = View.GONE
+        binding.livenessIndicator.visibility = View.GONE
+        binding.livenessInstruction.visibility = View.GONE
+        binding.instructionText.setText(R.string.position_face)
+    }
+
+    private fun performLivenessEvent(faceData: FaceData){
+        livenessProcessor.detectEvent(faceData, currentEvent)
+        binding.livenessInstructionBackground.visibility = View.VISIBLE
+        when(currentEvent){
+            LivenessDetectionEvents.SMILE -> {
+                binding.livenessInstruction.setText(R.string.smile_brightly)
+                binding.livenessIndicator.setImageResource(R.drawable.ic_smile)
+            }
+            LivenessDetectionEvents.BLINK -> {
+                binding.livenessInstruction.setText(R.string.blink_your_eyes)
+                binding.livenessIndicator.setImageResource(R.drawable.ic_blink)
+            }
+        }
+        binding.livenessIndicator.visibility = View.VISIBLE
+        binding.livenessInstruction.visibility = View.VISIBLE
     }
 
     override fun onFaceDetectSuccess(faceData: FaceData) {
