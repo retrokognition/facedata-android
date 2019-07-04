@@ -1,0 +1,57 @@
+<animated-vector
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:aapt="http://schemas.android.com/aapt">
+    <aapt:attr name="android:drawable">
+        <vector
+                android:name="vector"
+                android:width="48dp"
+                android:height="48dp"
+                android:viewportWidth="685"
+                android:viewportHeight="685">
+            <path
+                    android:name="path"
+                    android:pathData="M 342.5 3 C 252.494 3 166.081 38.793 102.437 102.437 C 38.793 166.081 3 252.494 3 342.5 C 3 432.506 38.793 518.919 102.437 582.563 C 166.081 646.207 252.494 682 342.5 682 C 432.506 682 518.919 646.207 582.563 582.563 C 646.207 518.919 682 432.506 682 342.5 C 682 252.494 646.207 166.081 582.563 102.437 C 518.919 38.793 432.506 3 342.5 3 Z"
+                    android:fillColor="#ffe012"
+                    android:strokeWidth="1"/>
+            <group
+                    android:name="face"
+                    android:translateX="0.0">
+                <path
+                        android:name="path_1"
+                        android:pathData="M 216.8 469.126 C 291.848 552.384 402.756 542.869 464 468"
+                        android:strokeColor="#303030"
+                        android:strokeWidth="34.56"
+                        android:strokeLineCap="round"/>
+                <path
+                        android:name="path_4"
+                        android:pathData="M 486 249 L 485 294"
+                        android:strokeColor="#3e3e3e"
+                        android:strokeWidth="66.46"
+                        android:strokeLineCap="round"/>
+                <path
+                        android:name="path_2"
+                        android:pathData="M 214 248 L 213 293"
+                        android:strokeColor="#3e3e3e"
+                        android:strokeWidth="66.46"
+                        android:strokeLineCap="round"/>
+            </group>
+        </vector>
+    </aapt:attr>
+    <target android:name="face">
+        <aapt:attr name="android:animation">
+
+            <set>
+                <objectAnimator
+                        android:propertyName="translateX"
+                        android:duration="1200"
+                        android:valueFrom="-130.0"
+                        android:valueTo="0.0"
+                        android:valueType="floatType"
+                        android:interpolator="@android:interpolator/fast_out_slow_in"/>
+
+            </set>
+
+        </aapt:attr>
+    </target>
+
+</animated-vector>

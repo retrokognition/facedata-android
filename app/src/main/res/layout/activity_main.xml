@@ -103,10 +103,12 @@
                 app:layout_constraintVertical_bias="0.7"/>
 
         <ImageView
+                android:clickable="true"
+                android:focusable="true"
                 android:visibility="gone"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                app:srcCompat="@drawable/ic_blink"
+                app:srcCompat="@drawable/ic_blink_anim"
                 android:id="@+id/liveness_indicator"
                 android:layout_marginBottom="8dp"
                 app:layout_constraintBottom_toTopOf="@+id/liveness_instruction"

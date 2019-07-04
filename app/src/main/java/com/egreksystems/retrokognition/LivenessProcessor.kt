@@ -16,6 +16,9 @@ class LivenessProcessor(events: LivenessDetectionEvents) {
 
     private var eyesCloseCount = 0
 
+    private var isheadTurned = false
+    private var isheadReturned = false
+
     fun setLivenessEventListener(eventListener: ILivenessEventListener){
         this.listener = eventListener
     }
@@ -38,6 +41,24 @@ class LivenessProcessor(events: LivenessDetectionEvents) {
                     if (blinkDetected(face)){
                         Log.e("EVENT_BLINK", "-----Blink Detected-----")
                         listener.onEventDetectionSuccess(LivenessDetectionEvents.BLINK)
+                    }
+                }
+
+                LivenessDetectionEvents.TURN_HEAD_RIGHT -> {
+                    Log.e("EVENT_TURN_RIGHT", "-----Checking For Turn Head Right-----")
+                    if (turnHeadRightDetected(face)){
+                        isheadTurned = false
+                        isheadReturned = false
+                        listener.onEventDetectionSuccess(LivenessDetectionEvents.TURN_HEAD_RIGHT)
+                    }
+                }
+
+                LivenessDetectionEvents.TURN_HEAD_LEFT -> {
+                    Log.e("EVENT_TURN_LEFT", "-----Checking For Turn Head Left-----")
+                    if (turnHeadLeftDetected(face)){
+                        isheadTurned = false
+                        isheadReturned = false
+                        listener.onEventDetectionSuccess(LivenessDetectionEvents.TURN_HEAD_LEFT)
                     }
                 }
             }
@@ -84,11 +105,33 @@ class LivenessProcessor(events: LivenessDetectionEvents) {
 
     }
 
+    private fun turnHeadRightDetected(face: FirebaseVisionFace): Boolean{
+        Log.e("HEAD_Y_ANGLE", "---Head Angle Y: " + face.headEulerAngleY.toString())
+        if (!isheadTurned){
+            isheadTurned = face.headEulerAngleY <= -50f
+        } else {
+            isheadReturned = face.headEulerAngleY >= -10f
+        }
+        return isheadTurned && isheadReturned
+    }
+
+    private fun turnHeadLeftDetected(face: FirebaseVisionFace): Boolean{
+        Log.e("HEAD_Y_ANGLE", "---Head Angle Y: " + face.headEulerAngleY.toString())
+        if (!isheadTurned){
+            isheadTurned = face.headEulerAngleY >= 50f
+        } else {
+            isheadReturned = face.headEulerAngleY <= 10
+        }
+        return isheadTurned && isheadReturned
+    }
+
     fun resetEvents(){
         livenessEvents.eventQueue.clear()
         livenessEvents.eventQueue.getEventList().addAll(eventList)
         eyesCloseCount = 0
         eyesOpenCount = 0
+        isheadReturned = false
+        isheadTurned = false
     }
 
 }

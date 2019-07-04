@@ -1,0 +1,7 @@
+<vector android:height="48dp" android:viewportHeight="1080"
+    android:viewportWidth="1080" android:width="48dp" xmlns:android="http://schemas.android.com/apk/res/android">
+    <path android:fillColor="#ddc000" android:name="Ellipse 1" android:pathData="m540 113.7c241.5 0 437.3 195.8 437.3 437.3c0 241.5 -195.8 437.3 -437.3 437.3c-241.5 0 -437.3 -195.8 -437.3 -437.3c0 -241.5 195.8 -437.3 437.3 -437.3z"/>
+    <path android:fillColor="#555" android:name="left_eye" android:pathData="m354 404.7c34 0 61.5 27.5 61.5 61.5c0 34 -27.5 61.5 -61.5 61.5c-34 0 -61.5 -27.5 -61.5 -61.5c0 -34 27.5 -61.5 61.5 -61.5z"/>
+    <path android:fillColor="#555" android:name="right_eye" android:pathData="m726 404.7c34 0 61.5 27.5 61.5 61.5c0 34 -27.5 61.5 -61.5 61.5c-34 0 -61.5 -27.5 -61.5 -61.5c0 -34 27.5 -61.5 61.5 -61.5z"/>
+    <path android:fillColor="#555" android:name="mouth" android:pathData="m391.1 746.5 298 1.1c5.5 0 10 4.5 10 10l-0.2 44c-0 5.5 -4.5 10 -10 10l-298 -1.1c-5.5 -0 -10 -4.5 -10 -10l0.2 -44c0 -5.5 4.5 -10 10 -10z"/>
+</vector>

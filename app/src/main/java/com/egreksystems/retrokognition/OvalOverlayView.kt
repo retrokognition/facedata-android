@@ -96,4 +96,6 @@ class OvalOverlayView(context: Context, attributeSet: AttributeSet) : View(conte
         return ovalBottom
     }
 
+    fun getOvalX(): Float = rectF.centerX()
+
 }
