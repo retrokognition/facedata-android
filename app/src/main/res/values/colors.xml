@@ -9,11 +9,15 @@
     <color name="color_accent">#4285F4</color>
     <color name="semi_transparent">#80000000</color>
     <color name="color_emerald">#2ecc71</color>
-    <color name="color_turquoise">#00FF99</color>
+    <color name="color_turquoise">#26CE4D</color>
     <color name="color_alizarin">#e74c3c</color>
 
     <color name="color_btn_gray">#DFDFDF</color>
     <color name="color_btn_disable">#9B4239</color>
+
+    <color name="grey">#AAA</color>
+
+    <color name="semi_grey_transparent">#A0000000</color>
 
 
 </resources>

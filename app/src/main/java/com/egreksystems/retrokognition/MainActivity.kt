@@ -12,6 +12,8 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.view.animation.Animation
+import android.view.animation.AnimationUtils
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat.postOnAnimation
@@ -43,7 +45,9 @@ class MainActivity : IFaceDetectionListener, ILivenessEventListener,  AppCompatA
     private var isLivenessDone = false
     private var isTurnBack = false
     private var currentEvent: Int? = LivenessDetectionEvents.NO_LIVENESS
+    private var previousEvent: Int? = LivenessDetectionEvents.NO_LIVENESS
     private lateinit var livenessAnimatedDrawable: Drawable
+    private lateinit var fadeIn: Animation
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -91,7 +95,14 @@ class MainActivity : IFaceDetectionListener, ILivenessEventListener,  AppCompatA
         recordButton.setOnClickListener {
             if (!recordButton.getPressedState()) {
                 currentEvent = events.eventQueue.dequeue() ?: LivenessDetectionEvents.NO_LIVENESS
-                performLiveness = currentEvent != LivenessDetectionEvents.NO_LIVENESS
+
+                performLiveness = if(currentEvent != LivenessDetectionEvents.NO_LIVENESS){
+                    binding.ovalOverlayView.setPaintStyle(ContextCompat.getColor(this, R.color.grey), false)
+                    binding.instructionText.setText(R.string.follow_instructions)
+                    true
+                } else {
+                    false
+                }
                 recordButton.enablePressed(true)
                 GeneralUtils.performHapticFeedback(this, GeneralUtils.BUTTON_CLICK_HAPTIC)
                 recordButton.isEnabled = false
@@ -101,13 +112,7 @@ class MainActivity : IFaceDetectionListener, ILivenessEventListener,  AppCompatA
         }
 
         livenessAnimatedDrawable = (binding.livenessIndicator.drawable)
-
-//        binding.livenessIndicator.visibility = View.VISIBLE
-//        binding.livenessIndicator.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_turn_right))
-//
-//        binding.livenessIndicator.setOnClickListener {
-//            (binding.livenessIndicator.drawable as AnimatedVectorDrawable).start()
-//        }
+        fadeIn = AnimationUtils.loadAnimation(this, R.anim.fade_in)
 
     }
 
@@ -179,40 +184,40 @@ class MainActivity : IFaceDetectionListener, ILivenessEventListener,  AppCompatA
     }
 
     private fun performLivenessEvent(faceData: FaceData) {
-        livenessProcessor.detectEvent(faceData, currentEvent)
         binding.livenessInstructionBackground.visibility = View.VISIBLE
         when (currentEvent) {
-            LivenessDetectionEvents.SMILE -> {
-                binding.livenessInstruction.setText(R.string.smile_brightly)
-                //binding.livenessIndicator.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_smile_anim))
-                startIconAnimation()
-            }
-            LivenessDetectionEvents.BLINK -> {
-                binding.livenessInstruction.setText(R.string.blink_your_eyes)
-                //binding.livenessIndicator.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_blink_anim))
-                startIconAnimation()
-            }
-            LivenessDetectionEvents.TURN_HEAD_RIGHT -> {
-                binding.livenessInstruction.setText(R.string.turn_head_right)
-                //binding.livenessIndicator.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_turn_right))
-                startIconAnimation()
-            }
-            LivenessDetectionEvents.TURN_HEAD_LEFT -> {
-                binding.livenessInstruction.setText(R.string.turn_head_left)
-                //binding.livenessIndicator.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_turn_left))
-                startIconAnimation()
-            }
+            LivenessDetectionEvents.SMILE -> binding.livenessInstruction.setText(R.string.smile_brightly)
+
+            LivenessDetectionEvents.BLINK -> binding.livenessInstruction.setText(R.string.blink_your_eyes)
+
+            LivenessDetectionEvents.TURN_HEAD_RIGHT -> binding.livenessInstruction.setText(R.string.turn_head_right)
+
+            LivenessDetectionEvents.TURN_HEAD_LEFT -> binding.livenessInstruction.setText(R.string.turn_head_left)
+
+            else -> return
+
         }
         binding.livenessIndicator.visibility = View.VISIBLE
         binding.livenessInstruction.visibility = View.VISIBLE
+        startIconAnimation()
+        livenessProcessor.detectEvent(faceData, currentEvent)
     }
 
     private fun startIconAnimation(){
 
         if (!(livenessAnimatedDrawable as Animatable).isRunning){
             when(currentEvent){
-                LivenessDetectionEvents.SMILE -> binding.livenessIndicator.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_smile_anim))
-                LivenessDetectionEvents.BLINK -> binding.livenessIndicator.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_blink_anim))
+                LivenessDetectionEvents.SMILE -> {
+                    if (previousEvent != LivenessDetectionEvents.SMILE){
+                        binding.livenessIndicator.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_smile_anim))
+                    }
+                }
+                LivenessDetectionEvents.BLINK -> {
+                    if(previousEvent != LivenessDetectionEvents.BLINK){
+                        binding.livenessIndicator.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_blink_anim))
+                    }
+                }
+
                 LivenessDetectionEvents.TURN_HEAD_RIGHT -> {
                     isTurnBack = if (!isTurnBack){
                         binding.livenessIndicator.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_turn_right))
@@ -269,12 +274,19 @@ class MainActivity : IFaceDetectionListener, ILivenessEventListener,  AppCompatA
     }
 
     override fun onEventDetectionSuccess(event: Int) {
+        isTurnBack = false
         if (event == currentEvent && events.eventQueue.isEmpty()) {
+            binding.ovalOverlayView.setPaintStyle(ContextCompat.getColor(this, R.color.color_turquoise), false)
             isLivenessDone = true
+            currentEvent = LivenessDetectionEvents.NO_LIVENESS
+            binding.livenessInstruction.setText(R.string.done)
+            binding.livenessIndicator.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_done_check))
+            binding.livenessIndicator.startAnimation(fadeIn)
         } else {
+            previousEvent = currentEvent
             currentEvent = events.eventQueue.dequeue() ?: LivenessDetectionEvents.NO_LIVENESS
         }
-        isTurnBack = false
+
     }
 
     override fun onEventDetectionCancelled() {

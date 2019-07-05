@@ -1,0 +1,5 @@
+<vector android:height="48dp" android:viewportHeight="500"
+    android:viewportWidth="500" android:width="48dp" xmlns:android="http://schemas.android.com/apk/res/android">
+    <path android:fillColor="#26ce4d" android:name="Ellipse 1" android:pathData="m250 40.4c115.7 0 209.6 93.8 209.6 209.6c0 115.7 -93.8 209.6 -209.6 209.6c-115.7 0 -209.6 -93.8 -209.6 -209.6c0 -115.7 93.8 -209.6 209.6 -209.6z"/>
+    <path android:fillColor="#fff" android:name="Rounded Rectangle 2" android:pathData="m355.4 191.6c-2 0 -4 0.6 -5.7 1.8l-146 101.8l-37.1 -51.2c-2 -2.7 -5 -4.1 -8.1 -4.1c-2 0 -4.1 0.6 -5.9 1.9l-8.9 6.5c-4.5 3.2 -5.5 9.5 -2.2 14l41.5 57.3c0.3 0.6 0.6 1.1 0.9 1.6l6.3 9c1.9 2.8 5.1 4.3 8.2 4.3c0.9 0 1.9 -0.1 2.8 -0.4c1.2 -0.3 2.4 -0.8 3.5 -1.6l6.5 -4.7l156.1 -108.8c4.5 -3.2 5.6 -9.4 2.5 -13.9l-6.3 -9c-1.9 -2.8 -5.1 -4.3 -8.2 -4.3z"/>
+</vector>
